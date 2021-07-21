@@ -13,6 +13,7 @@ class Product
     private $name;
     private $slug;
     private $platform;
+    private $regions;
     private $releasedAt;
 
     /**
@@ -25,12 +26,14 @@ class Product
         string $name,
         string $slug,
         string $platform,
+        array $regions,
         ?DateTimeInterface $releasedAt
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->slug = $slug;
         $this->platform = $platform;
+        $this->regions = $regions;
         $this->releasedAt = $releasedAt;
     }
 
@@ -52,6 +55,11 @@ class Product
     public function getPlatform(): array
     {
         return $this->platform;
+    }
+
+    public function getRegions(): string
+    {
+        return $this->regions;
     }
 
     public function getReleasedAt(): ?DateTimeInterface
