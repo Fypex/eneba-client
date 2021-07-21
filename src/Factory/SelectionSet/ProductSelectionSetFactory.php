@@ -31,6 +31,10 @@ class ProductSelectionSetFactory implements SelectionSetFactoryInterface, Select
                 new Field('label'),
                 new Field('value'),
             ])),
+            new Field('regions', new SelectionSet([
+                new Field('name'),
+                new Field('code'),
+            ])),
             new Field('releasedAt'),
         ]);
 

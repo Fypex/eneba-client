@@ -22,6 +22,7 @@ class ProductDenormalizer implements DenormalizerInterface, DenormalizerAwareInt
             $data['name'],
             $data['slug'],
             $data['platform']['label'],
+            $data['regions'],
             isset($data['releasedAt']) ? new DateTime($data['releasedAt']) : null
         );
 
