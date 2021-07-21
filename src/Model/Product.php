@@ -52,12 +52,12 @@ class Product
         return $this->slug;
     }
 
-    public function getPlatform(): array
+    public function getPlatform(): string
     {
         return $this->platform;
     }
 
-    public function getRegions(): string
+    public function getRegions(): array
     {
         return $this->regions;
     }
