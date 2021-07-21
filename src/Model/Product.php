@@ -49,7 +49,7 @@ class Product
         return $this->slug;
     }
 
-    public function getPlatform(): string
+    public function getPlatform(): array
     {
         return $this->platform;
     }
