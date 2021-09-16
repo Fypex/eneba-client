@@ -373,15 +373,18 @@ class Client implements ClientInterface
             $this->selectionSetFactoryProvider->get(ProviderNameEnum::KEY_CONNECTION())->get(),
             [
                 'stockId' => new VariableValue('$stockId'),
+                'state' => new VariableValue('$state')
             ]
         )
-            ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', true));
+            ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', true))
+            ->addVariable(new ScalarVariable('$state', 'S_KeyState', false));
 
         $request = $this->createMessage(
             $query->toString(),
             array_merge(['stockId' => $auctionId->toString()], $filter ? [
                 'cursor' => $this->generateCursor($filter->getPage(), $filter->getPerPage()),
                 'limit' => $filter->getPerPage(),
+                'state' => $filter->getState(),
             ] : [])
         );
 
