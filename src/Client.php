@@ -366,25 +366,28 @@ class Client implements ClientInterface
         );
     }
 
-    public function getAuctionKeys(UuidInterface $auctionId, ?KeysFilter $filter = null): KeyConnection
+    public function getAuctionKeys(UuidInterface $auctionId, ?KeysFilter $filter = null, array $uuids = []): KeyConnection
     {
         $query = $this->createConnectionQuery(
             Eneba::GQL_KEYS_QUERY,
             $this->selectionSetFactoryProvider->get(ProviderNameEnum::KEY_CONNECTION())->get(),
             [
                 'stockId' => new VariableValue('$stockId'),
-                'state' => new VariableValue('$state')
+                'state' => new VariableValue('$state'),
+                'ids' => new VariableValue('$ids')
             ]
         )
             ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', true))
-            ->addVariable(new ScalarVariable('$state', 'S_KeyState', false));
-
+            ->addVariable(new ScalarVariable('$state', 'S_KeyState', false))
+            ->addVariable(new ScalarVariable('$ids', '[S_Uuid!]', false));
+        
         $request = $this->createMessage(
             $query->toString(),
             array_merge(['stockId' => $auctionId->toString()], $filter ? [
                 'cursor' => $this->generateCursor($filter->getPage(), $filter->getPerPage()),
                 'limit' => $filter->getPerPage(),
                 'state' => $filter->getState(),
+                'ids' => $filter->getIds(),
             ] : [])
         );
 
