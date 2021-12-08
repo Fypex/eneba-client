@@ -25,6 +25,10 @@ use Helis\EnebaClient\Denormalizer\Object\SalesEdgeDenormalizer;
 use Helis\EnebaClient\Denormalizer\Object\StockConnectionDenormalizer;
 use Helis\EnebaClient\Denormalizer\Object\StockDenormalizer;
 use Helis\EnebaClient\Denormalizer\Object\StockEdgeDenormalizer;
+use Helis\EnebaClient\Denormalizer\Object\TransactionsConnectionDenormalizer;
+use Helis\EnebaClient\Denormalizer\Object\TransactionsDenormalizer;
+use Helis\EnebaClient\Denormalizer\Object\TransactionsEdgeDenormalizer;
+use Helis\EnebaClient\Model\Relay\Edge\TransactionsEdge;
 use RuntimeException;
 
 class Denormalizer implements DenormalizerInterface
@@ -66,6 +70,9 @@ class Denormalizer implements DenormalizerInterface
             new KeyConnectionDenormalizer(),
             new KeyEdgeDenormalizer(),
             new PriceUpdateQuotaDenormalizer(),
+            new TransactionsConnectionDenormalizer(),
+            new TransactionsEdgeDenormalizer(),
+            new TransactionsDenormalizer()
         ];
     }
 

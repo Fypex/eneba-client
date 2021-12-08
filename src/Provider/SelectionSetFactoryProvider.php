@@ -16,6 +16,8 @@ use Helis\EnebaClient\Factory\SelectionSet\ProductSelectionSetFactory;
 use Helis\EnebaClient\Factory\SelectionSet\SalesSelectionSetFactory;
 use Helis\EnebaClient\Factory\SelectionSet\SelectionSetFactoryInterface;
 use Helis\EnebaClient\Factory\SelectionSet\StockSelectionSetFactory;
+use Helis\EnebaClient\Factory\SelectionSet\TransactionsFragmentSelectionSetFactory;
+use Helis\EnebaClient\Factory\SelectionSet\TransactionsSelectionSetFactory;
 use RuntimeException;
 
 class SelectionSetFactoryProvider implements SelectionSetFactoryProviderInterface
@@ -38,6 +40,8 @@ class SelectionSetFactoryProvider implements SelectionSetFactoryProviderInterfac
             ProviderNameEnum::AUCTION => new AuctionSelectionSetFactory(),
             ProviderNameEnum::MONEY => new MoneySelectionSetFactory(),
             ProviderNameEnum::SALES => new SalesSelectionSetFactory(),
+            ProviderNameEnum::TRANSACTIONS_FRAGMENT => new TransactionsFragmentSelectionSetFactory(),
+            ProviderNameEnum::TRANSACTIONS => new TransactionsSelectionSetFactory(),
             ProviderNameEnum::STOCK => new StockSelectionSetFactory(),
             ProviderNameEnum::PRODUCT => new ProductSelectionSetFactory(false),
             ProviderNameEnum::PRODUCT_WITH_AUCTION => new ProductSelectionSetFactory(true),
@@ -45,6 +49,7 @@ class SelectionSetFactoryProvider implements SelectionSetFactoryProviderInterfac
             ProviderNameEnum::PRODUCT_CONNECTION => new ConnectionSelectionSetFactory(ProviderNameEnum::PRODUCT()),
             ProviderNameEnum::SALES_CONNECTION => new ConnectionSelectionSetFactory(ProviderNameEnum::SALES()),
             ProviderNameEnum::STOCK_CONNECTION => new ConnectionSelectionSetFactory(ProviderNameEnum::STOCK()),
+            ProviderNameEnum::TRANSACTION_CONNECTION => new ConnectionSelectionSetFactory(ProviderNameEnum::TRANSACTIONS_FRAGMENT()),
             ProviderNameEnum::KEY_CONNECTION => new ConnectionSelectionSetFactory(ProviderNameEnum::KEY()),
             ProviderNameEnum::KEY => new KeySelectionSetFactory(),
             ProviderNameEnum::COUNT_FEE => new CountFeeSelectionSetFactory(),

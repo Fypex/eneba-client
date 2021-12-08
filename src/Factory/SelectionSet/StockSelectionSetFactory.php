@@ -6,8 +6,8 @@ namespace Helis\EnebaClient\Factory\SelectionSet;
 use Helis\EnebaClient\Enum\SelectionSetFactoryProviderNameEnum;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProviderAwareInterface;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProviderAwareTrait;
-use Helis\GraphqlQueryBuilder\SelectionSet\Field;
-use Helis\GraphqlQueryBuilder\SelectionSet\SelectionSet;
+use Fypex\GraphqlQueryBuilder\SelectionSet\Field;
+use Fypex\GraphqlQueryBuilder\SelectionSet\SelectionSet;
 
 class StockSelectionSetFactory implements SelectionSetFactoryInterface, SelectionSetFactoryProviderAwareInterface
 {

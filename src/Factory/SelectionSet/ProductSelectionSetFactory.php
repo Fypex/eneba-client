@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace Helis\EnebaClient\Factory\SelectionSet;
 
+use Fypex\GraphqlQueryBuilder\SelectionSet\SelectionSet;
 use Helis\EnebaClient\Enum\SelectionSetFactoryProviderNameEnum;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProviderAwareInterface;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProviderAwareTrait;
-use Helis\GraphqlQueryBuilder\Argument\VariableValue;
-use Helis\GraphqlQueryBuilder\SelectionSet\Field;
-use Helis\GraphqlQueryBuilder\SelectionSet\SelectionSet;
+use Fypex\GraphqlQueryBuilder\Argument\VariableValue;
+use Fypex\GraphqlQueryBuilder\SelectionSet\Field;
 
 class ProductSelectionSetFactory implements SelectionSetFactoryInterface, SelectionSetFactoryProviderAwareInterface
 {

@@ -12,6 +12,7 @@ use Helis\EnebaClient\Enum\SelectionSetFactoryProviderNameEnum as ProviderNameEn
 use Helis\EnebaClient\Exception\GeneralException;
 use Helis\EnebaClient\Exception\GraphQLException;
 use Helis\EnebaClient\Exception\HttpException;
+use Helis\EnebaClient\Factory\SelectionSet\TransactionsSelectionSetFactory;
 use Helis\EnebaClient\Model\AccessToken;
 use Helis\EnebaClient\Model\ActionResponse;
 use Helis\EnebaClient\Model\ActionState;
@@ -19,23 +20,26 @@ use Helis\EnebaClient\Model\Input\KeysFilter;
 use Helis\EnebaClient\Model\Input\ProductsFilter;
 use Helis\EnebaClient\Model\Input\SalesFilter;
 use Helis\EnebaClient\Model\Input\StockFilter;
+use Helis\EnebaClient\Model\Input\TransactionsFilter;
 use Helis\EnebaClient\Model\Product;
 use Helis\EnebaClient\Model\Relay\Connection\KeyConnection;
 use Helis\EnebaClient\Model\Relay\Connection\ProductConnection;
 use Helis\EnebaClient\Model\Relay\Connection\SalesConnection;
 use Helis\EnebaClient\Model\Relay\Connection\StockConnection;
+use Helis\EnebaClient\Model\Relay\Connection\TransactionsConnection;
 use Helis\EnebaClient\Model\Stock;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProvider;
 use Helis\EnebaClient\Provider\SelectionSetFactoryProviderInterface;
 use Helis\EnebaClient\Storage\AccessTokenStorageInterface;
 use Helis\EnebaClient\Storage\ArrayAccessTokenStorage;
-use Helis\GraphqlQueryBuilder\Argument\VariableValue;
-use Helis\GraphqlQueryBuilder\Mutation;
-use Helis\GraphqlQueryBuilder\Query;
-use Helis\GraphqlQueryBuilder\SelectionSet\Field;
-use Helis\GraphqlQueryBuilder\SelectionSet\SelectionSet;
-use Helis\GraphqlQueryBuilder\Variable\ScalarVariable;
-use Helis\GraphqlQueryBuilder\Variable\StringVariable;
+use Fypex\GraphqlQueryBuilder\Argument\VariableValue;
+use Fypex\GraphqlQueryBuilder\Mutation;
+use Fypex\GraphqlQueryBuilder\Query;
+use Fypex\GraphqlQueryBuilder\SelectionSet\Field;
+use Fypex\GraphqlQueryBuilder\SelectionSet\Fragment;
+use Fypex\GraphqlQueryBuilder\SelectionSet\SelectionSet;
+use Fypex\GraphqlQueryBuilder\Variable\ScalarVariable;
+use Fypex\GraphqlQueryBuilder\Variable\StringVariable;
 use Http\Client\Curl\Client as CurlClient;
 use Http\Client\HttpClient;
 use Http\Message\MessageFactory;
@@ -143,6 +147,46 @@ class Client implements ClientInterface
         $data = $this->handleResponse($response);
 
         return $this->denormalizer->denormalize($data['data'][Eneba::GQL_STOCK_QUERY], StockConnection::class);
+    }
+
+    public function getTransactions(?TransactionsFilter $filter = null): TransactionsConnection
+    {
+
+        $fragment = new Fragment('saleTransaction', 'B_API_SaleTransaction',
+            $this->selectionSetFactoryProvider->get(ProviderNameEnum::TRANSACTIONS())->get()
+        );
+
+        $query = $this->createConnectionQuery(
+            Eneba::GQL_TRANSACTIONS_QUERY,
+            $this->selectionSetFactoryProvider->get(ProviderNameEnum::TRANSACTION_CONNECTION())->get(),
+            [
+                'types' => new VariableValue('$types'),
+                'direction' => new VariableValue('$direction'),
+                'createdFrom' => new VariableValue('$createdFrom'),
+                'createdTo' => new VariableValue('$createdTo'),
+            ],
+            $fragment
+        );
+
+        $query->addVariable(new ScalarVariable('$types', '[B_TransactionType!]'));
+        $query->addVariable(new ScalarVariable('$direction', 'B_DirectionEnum'));
+        $query->addVariable(new ScalarVariable('$createdFrom', 'B_DateTime'));
+        $query->addVariable(new ScalarVariable('$createdTo', 'B_DateTime'));
+
+        $request = $this->createMessage($query->toString(), $filter ? [
+            'cursor' => $this->generateCursor($filter->getPage(), $filter->getPerPage()),
+            'limit' => $filter->getPerPage(),
+            'types' => 'SALE',
+            'direction' => $filter->getDirection(),
+            'createdFrom' => $filter->getCreatedFrom() ? $filter->getCreatedFrom()->format('c') : null,
+            'createdTo' => $filter->getCreatedTo() ? $filter->getCreatedTo()->format('c') : null,
+        ] : []);
+
+        $response = $this->client->sendRequest($request);
+        $data = $this->handleResponse($response);
+
+        return $this->denormalizer->denormalize($data['data'][Eneba::GQL_TRANSACTIONS_QUERY], TransactionsConnection::class);
+
     }
 
     public function createAuction(UuidInterface $productId, bool $enabled, array $keys, bool $autoRenew, Money $price): ActionResponse
@@ -380,7 +424,7 @@ class Client implements ClientInterface
             ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', true))
             ->addVariable(new ScalarVariable('$state', 'S_KeyState', false))
             ->addVariable(new ScalarVariable('$ids', '[S_Uuid!]', false));
-        
+
         $request = $this->createMessage(
             $query->toString(),
             array_merge(['stockId' => $auctionId->toString()], $filter ? [
@@ -508,9 +552,10 @@ class Client implements ClientInterface
     private function createConnectionQuery(
         string $name,
         SelectionSet $selectionSet,
-        array $selectionSetArgs = []
+        array $selectionSetArgs = [],
+        ?Fragment $fragment = null
     ): Query {
-        return (new Query())
+        $query =  (new Query())
             ->addField(
                 new Field($name, $selectionSet, [
                         'after' => new VariableValue('$cursor'),
@@ -519,6 +564,33 @@ class Client implements ClientInterface
             )
             ->addVariable(new StringVariable('$cursor'))
             ->addVariable(new ScalarVariable('$limit', 'Int'));
+
+        if ($fragment){
+            $query->addFragment($fragment);
+        }
+
+        return $query;
+
+    }
+
+    private function createConnectionQueryWithFragment(
+        string $name,
+        Fragment $fragment,
+        array $selectionSetArgs = []
+    ): Query
+    {
+
+        return (new Query())
+            ->addField(
+                new Field($name, $fragment->getSelection(), [
+                        'after' => new VariableValue('$cursor'),
+                        'first' => new VariableValue('$limit'),
+                    ] + $selectionSetArgs)
+            )
+            ->addVariable(new StringVariable('$cursor'))
+            ->addVariable(new ScalarVariable('$limit', 'Int'))
+            ->addFragment($fragment);
+
     }
 
     private function getHeaders(string $contentType = 'application/json', bool $authorized = true): array

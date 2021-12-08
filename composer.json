@@ -19,7 +19,7 @@
     "require": {
         "php": "^7.1",
         "ext-json": "*",
-        "helis/graphql-query-builder": "dev-master",
+        "fypex/graphql-query-builder": "dev-main",
         "moneyphp/money": "^3.2",
         "myclabs/php-enum": "^1.7",
         "php-http/curl-client": "^2.0",
@@ -31,8 +31,6 @@
         "ramsey/uuid": "^3.8",
         "webmozart/assert": "^1.7",
         "zendframework/zend-diactoros": "^2.1"
-    },
-    "require-dev": {
     },
     "config": {
         "sort-packages": true,

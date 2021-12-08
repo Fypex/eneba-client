@@ -16,6 +16,7 @@ final class Eneba
 
     public const GQL_SALES_QUERY = 'S_sales';
     public const GQL_STOCK_QUERY = 'S_stock';
+    public const GQL_TRANSACTIONS_QUERY = 'B_transactions';
     public const GQL_PRODUCTS_QUERY = 'S_products';
     public const GQL_PRODUCT_QUERY = 'S_product';
     public const GQL_ACTION_QUERY = 'A_action';
