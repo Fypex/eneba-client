@@ -410,7 +410,7 @@ class Client implements ClientInterface
         );
     }
 
-    public function getAuctionKeys(UuidInterface $auctionId, ?KeysFilter $filter = null, array $uuids = []): KeyConnection
+    public function getAuctionKeys(?UuidInterface $auctionId = null, ?KeysFilter $filter = null, array $uuids = []): KeyConnection
     {
         $query = $this->createConnectionQuery(
             Eneba::GQL_KEYS_QUERY,
@@ -418,21 +418,38 @@ class Client implements ClientInterface
             [
                 'stockId' => new VariableValue('$stockId'),
                 'state' => new VariableValue('$state'),
-                'ids' => new VariableValue('$ids')
+                'ids' => new VariableValue('$ids'),
+                'orderNumber' => new VariableValue('$orderNumber')
             ]
         )
-            ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', true))
+            ->addVariable(new ScalarVariable('$stockId', 'S_Uuid', false))
             ->addVariable(new ScalarVariable('$state', 'S_KeyState', false))
-            ->addVariable(new ScalarVariable('$ids', '[S_Uuid!]', false));
+            ->addVariable(new ScalarVariable('$ids', '[S_Uuid!]', false))
+            ->addVariable(new ScalarVariable('$orderNumber', 'String', false));
+
+        $params = [];
+
+        if ($auctionId instanceof UuidInterface)
+        {
+            $params['stockId'] = $auctionId->toString();
+        }
+
+
+        $filters = $filter ? [
+            'cursor' => $this->generateCursor($filter->getPage(), $filter->getPerPage()),
+            'limit' => $filter->getPerPage(),
+            'state' => $filter->getState(),
+            'ids' => $filter->getIds(),
+            'orderNumber' => $filter->getOrderNumber(),
+        ] : [];
+
+        if ($filters['state'] === null){
+            unset($filters['state']);
+        }
 
         $request = $this->createMessage(
             $query->toString(),
-            array_merge(['stockId' => $auctionId->toString()], $filter ? [
-                'cursor' => $this->generateCursor($filter->getPage(), $filter->getPerPage()),
-                'limit' => $filter->getPerPage(),
-                'state' => $filter->getState(),
-                'ids' => $filter->getIds(),
-            ] : [])
+            array_merge($params, $filters)
         );
 
         $response = $this->client->sendRequest($request);

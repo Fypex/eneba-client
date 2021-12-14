@@ -44,7 +44,7 @@ interface ClientInterface
      */
     public function removeKeysFromAuction(UuidInterface $auctionId, array $keysIds): ActionResponse;
 
-    public function getAuctionKeys(UuidInterface $auctionId, ?KeysFilter $filter = null): KeyConnection;
+    public function getAuctionKeys(?UuidInterface $auctionId = null, ?KeysFilter $filter = null): KeyConnection;
 
     public function getFee(FeeTypeEnum $feeType): ?Money;
 }
